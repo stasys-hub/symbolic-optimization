@@ -11,3 +11,6 @@ wheels/
 
 # data
 data/
+
+# local agent instructions
+AGENTS.md
