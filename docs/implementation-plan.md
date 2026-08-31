@@ -93,8 +93,8 @@ response or a documented fallback.
   documentation.
 - Tests: no label or identifier column appears in the feature matrix, the
   holdout is disjoint from the training part and stratified, records
-  round-trip through JSONL, the rule classifier reproduces the
-  `Machine failure` label exactly.
+  round-trip through JSONL, the deterministic rules reproduce the `HDF`,
+  `PWF`, and `OSF` indicator columns exactly.
 
 Acceptance: `uv run pytest` passes, `uv run ruff check` is clean.
 
