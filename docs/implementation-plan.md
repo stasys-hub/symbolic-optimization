@@ -20,9 +20,14 @@ analysis produces plots and tables for an accompanying blog post series.
 | Budget | 50 CV evaluations per arm |
 | Timing | Wall-clock recorded per evaluation and cumulatively |
 | Arms 1 and 3 search space | Estimator choice (logistic branch, random forest branch) plus per-branch hyperparameters, identical for both arms |
+| Agent configuration | Key from `GLM_API_KEY`, model id from `GLM_MODEL` (default `glm-5.3-flash`), temperature 0 |
+| Holdout | Stratified 80/20 split; search uses the train part only; each arm's final configuration is fit once and scored once on the test part |
+| Execution policy | Single-threaded everywhere: no parallel CV in Optuna, fixed PySR thread count; thread counts, CPU, and Julia version recorded |
+| PySR preprocessing | Standardization fit inside the CV folds only |
+| Baselines | Default logistic regression and default random forest; the ground-truth rule classifier, scored on the same splits |
+| Repetitions | Arm 1 repeated with 5 seeds for a variance band; arms 2 and 3 single-run |
 | Agent model | GLM 5.3 flash via the OpenAI-compatible pydantic-ai interface |
 | Agent endpoint | `https://api.z.ai/api/coding/paas/v4`, default of `GLM_BASE_URL` |
-| Agent configuration | Key from `GLM_API_KEY`, model id from `GLM_MODEL` (default `glm-5.3-flash`), temperature 0 |
 | Canonical data file | `ai4i2020.csv` at repository root, tracked |
 
 ### Search space for arms 1 and 3
@@ -65,22 +70,31 @@ Arm-specific payload fields:
 
 - Add `pydantic-graph` with uv; optuna is already present.
 - Remove the `main.py` bootstrap file.
-- Verify the PySR import and the Julia installation with a minimal regression
-  on synthetic data.
-- Verify the GLM endpoint with a one-token pydantic-ai request, confirming
-  the model id string.
+- Verify PySR against the installed Julia 1.12.6 (system package) with a
+  minimal regression on synthetic data, confirming juliacall uses it.
+- Verify pydantic-ai structured output against the GLM endpoint with a small
+  typed response, confirming the model id and the structured-output mechanism.
+  If strict structured output is unsupported, record the fallback of parsing
+  the content field as JSON.
 
-Acceptance: `uv run pytest` collects zero tests without error, PySR fits a
-toy expression, the endpoint call returns a completion.
+Acceptance: PySR fits a toy expression, the endpoint call returns a typed
+response or a documented fallback.
 
 ### Phase 1: package skeleton, data module, trial schema
 
-- Create `symbolic_optimization/__init__.py`, `data.py`, `trials.py`.
-- `data.py`: dataset loading, feature and target selection, the shared CV
-  splitter factory, one-hot encoding of the product variant.
+- Create `symbolic_optimization/__init__.py`, `data.py`, `trials.py`,
+  `baselines.py`.
+- `data.py`: dataset loading, feature and target selection, the stratified
+  80/20 holdout split, the shared CV splitter factory for the train part,
+  one-hot encoding of the product variant.
 - `trials.py`: the trial record dataclass, JSONL append and load functions.
+- `baselines.py`: default logistic regression and random forest
+  configurations; the ground-truth rule classifier derived from the dataset
+  documentation.
 - Tests: no label or identifier column appears in the feature matrix, the
-  splitter is stratified and seeded, records round-trip through JSONL.
+  holdout is disjoint from the training part and stratified, records
+  round-trip through JSONL, the rule classifier reproduces the
+  `Machine failure` label exactly.
 
 Acceptance: `uv run pytest` passes, `uv run ruff check` is clean.
 
@@ -88,6 +102,7 @@ Acceptance: `uv run pytest` passes, `uv run ruff check` is clean.
 
 - `track_optuna.py`: TPE study over the shared space, objective built on the
   shared evaluation function, per-trial JSONL logging, fixed seed.
+- The arm runs with 5 different seeds, one log file per seed.
 - Tests: the study returns a best configuration, the log contains one record
   per trial.
 
@@ -95,10 +110,9 @@ Acceptance: a 10-trial smoke run writes a valid log.
 
 ### Phase 3: PySR track
 
-- `track_pysr.py`: weighted `PySRRegressor` on the binary target, bounded
-  complexity, logging of hall-of-fame candidates mapped to trial records.
-- Ground-truth comparison helper: evaluates the known rule set as a
-  classifier on the same folds for reference.
+- `track_pysr.py`: weighted `PySRRegressor` on the binary target,
+  standardization fit inside each fold, bounded complexity, logging of
+  hall-of-fame candidates mapped to trial records.
 - Tests: the mapping from PySR output to trial records is correct.
 
 Acceptance: a short run produces expressions with logged complexity and loss.
@@ -120,16 +134,23 @@ valid log.
 
 ### Phase 5: execution
 
-- Run all three arms at full budget, commit the resulting JSONL logs.
-- Record environment details (Python, package versions, CPU) in
-  `results/environment.json`.
+- Run all three arms at full budget, commit the resulting JSONL logs
+  (arm 1 once per seed).
+- Run the baselines on the same folds.
+- Score every final configuration once on the holdout and record it.
+- Record environment details (Python, package versions, CPU, thread counts,
+  Julia version) in `results/environment.json`.
 
 ### Phase 6: analysis notebook
 
 - `notebooks/analysis.ipynb`: best-so-far curves versus evaluation index and
-  versus wall-clock time, parameter trajectories per arm, agent decision
-  timeline with rationales, PySR expressions against the ground-truth rules.
+  versus wall-clock time, with the arm 1 seed band, baseline reference lines,
+  and the ground-truth rule line; parameter trajectories per arm; agent
+  decision timeline with rationales; PySR expressions against the
+  ground-truth rules; holdout scores as a summary table.
 - Altair for all plots, with matplotlib as the documented fallback.
+- Every figure carries axis labels, units, and a title; the notebook states
+  the single-run limitation for arms 2 and 3.
 
 Acceptance: the notebook runs top to bottom on the committed logs.
 
@@ -141,10 +162,14 @@ Acceptance: the notebook runs top to bottom on the committed logs.
 
 ## Risks
 
-- PySR depends on a Julia runtime installed through juliacall. First
-  installation needs network access and several minutes. Phase 0 verifies
-  this before any dependent work starts.
-- The model id string for the GLM endpoint is unverified. Phase 0 confirms it.
+- Julia 1.12.6 is installed system-wide. juliacall may still fetch a private
+  runtime; phase 0 verifies which one is used and records it.
+- The endpoint answers plain completions (verified with curl). Strict
+  `json_schema` structured output through pydantic-ai is unverified; the
+  fallback is manual JSON parsing of the content field.
+- glm-5.3-flash produces internal reasoning tokens before the answer. The
+  loop needs a generous `max_tokens` budget and separate logging of
+  reasoning tokens.
 - The coding-plan endpoint may enforce rate limits. The agent loop records
   latency and retries, and the log keeps every request-response pair.
 - LLM output is not reproducible in general. Temperature 0 and full logging
