@@ -1,5 +1,8 @@
 # symbolic-optimization
 
+> [!WARNING]  
+> Most of the code in this repo is vibe coded and AI-slop. I wouldn't recommmend this as some sort of reference for a professional implementation. GenAI is awesome to speed up things, but the code quality is still questionable and just have a look at the creation of the pandas 'trail' df (insert crying emoji). Nevertheless, it is awesome to try new ideas - which are mine and not vibe-thoughts. So take the implementation with a grain of salt. 
+
 This repository accompanies a blog post series. It compares three search
 strategies for predictive modeling on the AI4I 2020 predictive maintenance
 dataset:
