@@ -1,7 +1,7 @@
 [project]
 name = "symbolic-optimization"
 version = "0.1.0"
-description = "Add your description here"
+description = "Comparison of search strategies on the AI4I 2020 predictive maintenance dataset"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
