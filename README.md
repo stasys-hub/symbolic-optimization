@@ -67,7 +67,22 @@ Arm 2 runs PySR on the same features and folds with a bounded expression
 complexity, and logs every candidate expression it evaluates. Arm 3 sends the
 trial history to a GLM 5.3 flash model through the pydantic-ai OpenAI
 interface and receives the next configuration as structured output, together
-with a short rationale that is logged verbatim.
+with a short rationale that is logged verbatim. The loop of arm 3 is a
+pydantic-graph state machine:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Propose
+    Propose --> Evaluate
+    Evaluate --> Decide
+    Decide --> Propose: budget remaining
+    Decide --> [*]: budget reached
+```
+
+`Propose` calls the model with the search space description and the trial
+history, `Evaluate` runs the shared cross-validation on the returned
+configuration, and `Decide` loops until the evaluation budget is spent. The
+model performs no tool calls; the host executes all computation.
 
 The hypothesis spaces differ in nature. Arms 1 and 3 select between two fixed
 model families and tune discrete or continuous parameters. Arm 2 searches a
