@@ -16,6 +16,7 @@ from time import perf_counter
 
 import numpy as np
 import pandas as pd
+import sympy
 from pysr import PySRRegressor
 from sklearn.metrics import average_precision_score
 from sklearn.model_selection import BaseCrossValidator
@@ -34,6 +35,16 @@ DATA_SEED = 0
 ARM_NAME = "pysr"
 BINARY_OPERATORS = ["+", "-", "*", "/", "max", "min"]
 UNARY_OPERATORS: list[str] = []
+LOGISTIC_LOSS = (
+    "loss(p, t, w) = begin; s = 1.0 / (1.0 + exp(-p));"
+    " -w * (t * log(s + 1e-9) + (1 - t) * log(1 - s + 1e-9)); end"
+)
+SYMPY_MAPPINGS = {
+    "greater": lambda x, y: sympy.Heaviside(x - y),
+    "less": lambda x, y: sympy.Heaviside(y - x),
+    "logical_or": lambda x, y: sympy.Max(x, y),
+    "logical_and": lambda x, y: sympy.Min(x, y),
+}
 VARIABLE_NAMES = {
     "Air temperature [K]": "air_temp",
     "Process temperature [K]": "proc_temp",
@@ -73,6 +84,9 @@ def balanced_sample_weights(target: pd.Series) -> np.ndarray:
 def run(
     n_iterations: int = 50,
     max_complexity: int = 25,
+    binary_operators: list[str] | None = None,
+    elementwise_loss: str | None = None,
+    log_name: str = "pysr.jsonl",
     frame: pd.DataFrame | None = None,
     out_dir: str | Path = "results",
     splitter: BaseCrossValidator | None = None,
@@ -88,6 +102,11 @@ def run(
     Args:
         n_iterations: PySR iterations per fold.
         max_complexity: Maximum expression complexity.
+        binary_operators: Binary operator set, defaults to
+            ``BINARY_OPERATORS``.
+        elementwise_loss: Julia source of a scalar loss over prediction,
+            target, and weight; weighted squared error when None.
+        log_name: File name of the JSONL log.
         frame: Dataset override, mainly for tests.
         out_dir: Directory for the trial log.
         splitter: Cross-validation override, mainly for tests.
@@ -104,7 +123,7 @@ def run(
     holdout_target = make_target(frame).iloc[holdout_idx]
     splitter = cv_splitter(seed=DATA_SEED) if splitter is None else splitter
 
-    log_path = Path(out_dir) / "pysr.jsonl"
+    log_path = Path(out_dir) / log_name
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.unlink(missing_ok=True)
     start = perf_counter()
@@ -127,9 +146,13 @@ def run(
         fold_start = perf_counter()
         model = PySRRegressor(
             niterations=n_iterations,
-            binary_operators=BINARY_OPERATORS,
+            binary_operators=binary_operators
+            if binary_operators is not None
+            else BINARY_OPERATORS,
             unary_operators=UNARY_OPERATORS,
             maxsize=max_complexity,
+            elementwise_loss=elementwise_loss,
+            extra_sympy_mappings=SYMPY_MAPPINGS,
             temp_equation_file=True,
             verbosity=0,
             progress=False,
@@ -185,8 +208,24 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--iterations", type=int, default=50)
     parser.add_argument("--max-complexity", type=int, default=25)
+    parser.add_argument("--operators", type=str, default=None)
+    parser.add_argument("--loss", choices=["mse", "logistic"], default="mse")
+    parser.add_argument("--out-dir", type=Path, default=Path("results"))
+    parser.add_argument("--out-name", default="pysr.jsonl")
     args = parser.parse_args()
-    print(run(args.iterations, args.max_complexity), flush=True)
+    operators = args.operators.split(",") if args.operators else None
+    loss = LOGISTIC_LOSS if args.loss == "logistic" else None
+    print(
+        run(
+            n_iterations=args.iterations,
+            max_complexity=args.max_complexity,
+            binary_operators=operators,
+            elementwise_loss=loss,
+            log_name=args.out_name,
+            out_dir=args.out_dir,
+        ),
+        flush=True,
+    )
 
 
 if __name__ == "__main__":
