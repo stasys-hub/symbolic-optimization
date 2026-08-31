@@ -168,17 +168,30 @@ def best_parametric_entry(
 def best_pysr_entry(records: list[TrialRecord]) -> dict[str, Any]:
     """Aggregate PySR records by complexity and select the best.
 
+    Only complexities present in every fold are eligible for selection,
+    because hall-of-fame complexities appear in a varying number of
+    folds and the highest raw scores tend to come from complexities
+    seen in a single fold.
+
     Args:
         records: Trial records of the PySR log.
 
     Returns:
         Summary dictionary with the selected complexity and both scores.
+
+    Raises:
+        ValueError: If no records are given.
     """
     by_complexity: dict[int, list[TrialRecord]] = {}
     for record in records:
         by_complexity.setdefault(int(record.params["complexity"]), []).append(record)
+    if not by_complexity:
+        raise ValueError("no pysr records found")
+    expected_folds = max(len(group) for group in by_complexity.values())
     best: dict[str, Any] | None = None
     for complexity, group in by_complexity.items():
+        if len(group) != expected_folds:
+            continue
         cv_mean = float(np.mean([record.mean_score for record in group]))
         holdout_scores = [
             record.payload.get("holdout_ap")

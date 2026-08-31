@@ -83,11 +83,11 @@ def make_pysr_record(index: int, complexity: int, score: float, holdout: float):
     )
 
 
-def test_best_pysr_entry_aggregates_by_complexity() -> None:
+def test_best_pysr_entry_requires_full_fold_coverage() -> None:
     records = [
         make_pysr_record(0, 5, 0.60, 0.58),
         make_pysr_record(1, 5, 0.62, 0.60),
-        make_pysr_record(2, 7, 0.50, 0.49),
+        make_pysr_record(2, 7, 0.90, 0.88),
     ]
     entry = finalize.best_pysr_entry(records)
     assert entry["best_params"]["complexity"] == 5

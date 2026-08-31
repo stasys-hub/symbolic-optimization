@@ -113,6 +113,16 @@ PySR installs a Julia runtime on first use.
     docs/                      implementation plan
     ai4i2020.csv               dataset
 
+## License and citation
+
+Everything in this repository (code, notebook, trial logs, and figures)
+is licensed under [CC BY 4.0](./LICENSE); Copyright (c) 2026 Stanislav
+Sys (dr.yleaf). If you build on it, credit the author and link the
+repository. Citation metadata is in `CITATION.cff`.
+
+The AI4I 2020 dataset (`ai4i2020.csv`) is distributed by its authors
+under CC BY 4.0 as well; cite Matzka (2020) when you use it.
+
 ## Status
 
 Implementation and analysis are complete. The phase plan and settled
@@ -125,14 +135,22 @@ Best mean cross-validation and holdout average precision per arm:
 | --- | --- | --- |
 | Optuna, five seeds | 0.831 | 0.823 |
 | Agent, glm-5.3-flash | 0.833 | 0.817 |
-| PySR, iteration 1 | 0.546 | 0.562 |
-| PySR, iteration 2 | 0.489 | 0.474 |
+| PySR, iteration 1 | 0.321 | 0.359 |
+| PySR, iteration 2 | 0.443 | 0.450 |
 | Default random forest | reference | 0.769 |
 | Ground-truth rules | reference | 0.844 |
 
-Iteration 2 gives PySR the comparison and logical operators, a logistic loss,
-a higher complexity bound, and a doubled budget. It scores below iteration 1:
-the operator set multiplies the expression tree space while the budget only
-doubles, so search throughput, not expressiveness, is the binding constraint
-for symbolic regression on this task.
+Comparisons between arms rest on the holdout column; the best CV values are
+maxima over trials and therefore selection-biased. The agent reaches 0.833 CV
+and 0.817 holdout, inside the Optuna seed band of 0.816 to 0.831 CV and 0.818
+to 0.825 holdout, at about thirteen times the wall-clock time and roughly
+235,000 tokens. Parity within the observed spread, not an advantage.
+
+PySR scores are the best expression complexity present in all five folds.
+Higher raw scores occur at complexities seen in a single fold and are
+one-fold results. Under the full-coverage rule, iteration 2, with a logistic
+loss, the comparison and logical operators, and a doubled budget, improves on
+iteration 1 on both scores: the objective and operator set limited iteration
+1 more than search throughput did. Both iterations remain far below the
+default random forest.
 

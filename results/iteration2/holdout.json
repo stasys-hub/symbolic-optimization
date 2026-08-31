@@ -26,11 +26,11 @@
   {
     "arm": "pysr",
     "best_params": {
-      "complexity": 23,
-      "expression": "1.6019797 * (max(rpm, max(less(rpm, -0.6804533), max(tool_wear, 0.0) * tool_wear) + max((torque + torque) + air_temp, tool_wear)) + -3.8170133)"
+      "complexity": 15,
+      "expression": "max(rpm, (torque + max(air_temp + torque, tool_wear + tool_wear)) / 0.79964024) + -3.575835"
     },
-    "cv_mean": 0.4887654091229097,
-    "holdout_ap": 0.474197205509397,
-    "folds_present": 1
+    "cv_mean": 0.442611431629741,
+    "holdout_ap": 0.44949367988691674,
+    "folds_present": 5
   }
 ]
