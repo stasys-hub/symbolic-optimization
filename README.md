@@ -125,7 +125,14 @@ Best mean cross-validation and holdout average precision per arm:
 | --- | --- | --- |
 | Optuna, five seeds | 0.831 | 0.823 |
 | Agent, glm-5.3-flash | 0.833 | 0.817 |
-| PySR | 0.546 | 0.562 |
+| PySR, iteration 1 | 0.546 | 0.562 |
+| PySR, iteration 2 | 0.489 | 0.474 |
 | Default random forest | reference | 0.769 |
 | Ground-truth rules | reference | 0.844 |
+
+Iteration 2 gives PySR the comparison and logical operators, a logistic loss,
+a higher complexity bound, and a doubled budget. It scores below iteration 1:
+the operator set multiplies the expression tree space while the budget only
+doubles, so search throughput, not expressiveness, is the binding constraint
+for symbolic regression on this task.
 

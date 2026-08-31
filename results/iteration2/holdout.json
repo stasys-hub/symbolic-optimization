@@ -1,0 +1,36 @@
+[
+  {
+    "arm": "baseline_default_logistic",
+    "best_params": {
+      "estimator": "default"
+    },
+    "cv_mean": null,
+    "holdout_ap": 0.5056023700902356
+  },
+  {
+    "arm": "baseline_default_forest",
+    "best_params": {
+      "estimator": "default"
+    },
+    "cv_mean": null,
+    "holdout_ap": 0.7692353355985296
+  },
+  {
+    "arm": "ground_truth_rules",
+    "best_params": {
+      "expression": "hdf | pwf | osf"
+    },
+    "cv_mean": null,
+    "holdout_ap": 0.843735294117647
+  },
+  {
+    "arm": "pysr",
+    "best_params": {
+      "complexity": 23,
+      "expression": "1.6019797 * (max(rpm, max(less(rpm, -0.6804533), max(tool_wear, 0.0) * tool_wear) + max((torque + torque) + air_temp, tool_wear)) + -3.8170133)"
+    },
+    "cv_mean": 0.4887654091229097,
+    "holdout_ap": 0.474197205509397,
+    "folds_present": 1
+  }
+]
