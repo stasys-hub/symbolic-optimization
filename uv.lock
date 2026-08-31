@@ -3101,6 +3101,7 @@ dependencies = [
     { name = "optuna" },
     { name = "pandas" },
     { name = "pydantic-ai" },
+    { name = "pydantic-graph" },
     { name = "pysr" },
     { name = "scikit-learn" },
 ]
@@ -3120,6 +3121,7 @@ requires-dist = [
     { name = "optuna", specifier = ">=4.9.0" },
     { name = "pandas", specifier = ">=3.0.5" },
     { name = "pydantic-ai", specifier = ">=2.36.0" },
+    { name = "pydantic-graph", specifier = ">=2.36.0" },
     { name = "pysr", specifier = ">=2.1.0" },
     { name = "scikit-learn", specifier = ">=1.9.0" },
 ]

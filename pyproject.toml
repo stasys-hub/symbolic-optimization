@@ -12,6 +12,7 @@ dependencies = [
     "optuna>=4.9.0",
     "pandas>=3.0.5",
     "pydantic-ai>=2.36.0",
+    "pydantic-graph>=2.36.0",
     "pysr>=2.1.0",
     "scikit-learn>=1.9.0",
 ]
