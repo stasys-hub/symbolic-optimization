@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-08-31T11:54:08.754490+00:00",
+  "python": "3.12.12",
+  "packages": {
+    "scikit-learn": "1.9.0",
+    "optuna": "4.9.0",
+    "pysr": "2.1.0",
+    "pydantic-ai": "2.36.0",
+    "pydantic-graph": "2.36.0",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "altair": "6.2.2"
+  },
+  "cpu": "12th Gen Intel(R) Core(TM) i5-12600K",
+  "threads": 1,
+  "julia": "julia version 1.12.6",
+  "agent_model": "glm-5.3-flash"
+}

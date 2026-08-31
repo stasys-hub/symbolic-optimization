@@ -1,0 +1,114 @@
+[
+  {
+    "arm": "baseline_default_logistic",
+    "best_params": {
+      "estimator": "default"
+    },
+    "cv_mean": null,
+    "holdout_ap": 0.5056023700902356
+  },
+  {
+    "arm": "baseline_default_forest",
+    "best_params": {
+      "estimator": "default"
+    },
+    "cv_mean": null,
+    "holdout_ap": 0.7692353355985296
+  },
+  {
+    "arm": "ground_truth_rules",
+    "best_params": {
+      "expression": "hdf | pwf | osf"
+    },
+    "cv_mean": null,
+    "holdout_ap": 0.843735294117647
+  },
+  {
+    "arm": "agent",
+    "best_params": {
+      "estimator": "random_forest",
+      "n_estimators": 391,
+      "max_depth": 10,
+      "min_samples_leaf": 1,
+      "max_features": "all",
+      "class_weight": "none"
+    },
+    "cv_mean": 0.8333564061305635,
+    "holdout_ap": 0.8166101000121918
+  },
+  {
+    "arm": "optuna_seed0",
+    "best_params": {
+      "estimator": "random_forest",
+      "n_estimators": 341,
+      "max_depth": 10,
+      "min_samples_leaf": 4,
+      "max_features": "all",
+      "class_weight": "none"
+    },
+    "cv_mean": 0.8265072173419151,
+    "holdout_ap": 0.8233942999847934
+  },
+  {
+    "arm": "optuna_seed1",
+    "best_params": {
+      "estimator": "random_forest",
+      "n_estimators": 103,
+      "max_depth": 9,
+      "min_samples_leaf": 5,
+      "max_features": "all",
+      "class_weight": "none"
+    },
+    "cv_mean": 0.8156730178322977,
+    "holdout_ap": 0.8199827941201216
+  },
+  {
+    "arm": "optuna_seed2",
+    "best_params": {
+      "estimator": "random_forest",
+      "n_estimators": 299,
+      "max_depth": 13,
+      "min_samples_leaf": 3,
+      "max_features": "all",
+      "class_weight": "none"
+    },
+    "cv_mean": 0.825799196601319,
+    "holdout_ap": 0.8253442646833792
+  },
+  {
+    "arm": "optuna_seed3",
+    "best_params": {
+      "estimator": "random_forest",
+      "n_estimators": 295,
+      "max_depth": 16,
+      "min_samples_leaf": 2,
+      "max_features": "all",
+      "class_weight": "none"
+    },
+    "cv_mean": 0.8241739366299757,
+    "holdout_ap": 0.8241627355602519
+  },
+  {
+    "arm": "optuna_seed4",
+    "best_params": {
+      "estimator": "random_forest",
+      "n_estimators": 217,
+      "max_depth": 9,
+      "min_samples_leaf": 2,
+      "max_features": "all",
+      "class_weight": "none"
+    },
+    "cv_mean": 0.8305870510989752,
+    "holdout_ap": 0.8205953433170394
+  },
+  {
+    "arm": "pysr",
+    "best_params": {
+      "complexity": 21,
+      "expression": "max(max(tool_wear, torque + max(tool_wear, max(-0.026843453, max(min(max(rpm, max(rpm, 1.3087279)), air_temp), rpm)))) * 0.27716792, -0.12378032)"
+    },
+    "cv_mean": 0.5454992514385815,
+    "holdout_ap": 0.5622143755527458,
+    "folds_present": 1
+  }
+]
