@@ -32,7 +32,7 @@ from symbolic_optimization.trials import TrialRecord, append_record
 
 DATA_SEED = 0
 ARM_NAME = "pysr"
-BINARY_OPERATORS = ["+", "-", "*", "/"]
+BINARY_OPERATORS = ["+", "-", "*", "/", "max", "min"]
 UNARY_OPERATORS: list[str] = []
 VARIABLE_NAMES = {
     "Air temperature [K]": "air_temp",
@@ -186,7 +186,7 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=50)
     parser.add_argument("--max-complexity", type=int, default=25)
     args = parser.parse_args()
-    print(run(args.iterations, args.max_complexity))
+    print(run(args.iterations, args.max_complexity), flush=True)
 
 
 if __name__ == "__main__":
