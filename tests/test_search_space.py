@@ -38,7 +38,7 @@ def test_logistic_branch_builds_pipeline() -> None:
     names = [name for name, _ in pipeline.steps]
     assert names == ["scaler", "interactions", "logistic"]
     logistic = pipeline.named_steps["logistic"]
-    assert logistic.penalty == "l1"
+    assert logistic.l1_ratio == 1.0
     assert logistic.class_weight == "balanced"
     assert logistic.solver == "liblinear"
 

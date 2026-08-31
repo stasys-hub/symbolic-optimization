@@ -134,7 +134,7 @@ def build_estimator(params: dict[str, Any], seed: int) -> Any:
                 "logistic",
                 LogisticRegression(
                     C=valid.C,
-                    penalty=valid.penalty,
+                    l1_ratio=1.0 if valid.penalty == "l1" else 0.0,
                     solver="liblinear",
                     class_weight=None if valid.class_weight == "none" else "balanced",
                     max_iter=1000,
