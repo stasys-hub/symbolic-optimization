@@ -100,5 +100,17 @@ PySR installs a Julia runtime on first use.
 
 ## Status
 
-Implementation is in progress. The phase plan and the settled experiment
-decisions are recorded in `docs/implementation-plan.md`.
+Implementation and analysis are complete. The phase plan and settled
+decisions are in `docs/implementation-plan.md`, the executed analysis is in
+`notebooks/analysis.ipynb`, and the recorded runs are in `results/`.
+
+Best mean cross-validation and holdout average precision per arm:
+
+| Arm | Best CV AP | Holdout AP |
+| --- | --- | --- |
+| Optuna, five seeds | 0.831 | 0.823 |
+| Agent, glm-5.3-flash | 0.833 | 0.817 |
+| PySR | 0.546 | 0.562 |
+| Default random forest | reference | 0.769 |
+| Ground-truth rules | reference | 0.844 |
+
