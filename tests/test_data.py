@@ -6,11 +6,6 @@ import pytest
 from symbolic_optimization import data
 
 
-@pytest.fixture(scope="module")
-def frame() -> pd.DataFrame:
-    return data.load_dataset()
-
-
 def test_features_exclude_labels_and_identifiers(frame: pd.DataFrame) -> None:
     features = data.make_features(frame)
     banned = set(data.LABEL_COLUMNS + data.IDENTIFIER_COLUMNS)

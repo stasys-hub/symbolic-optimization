@@ -1,14 +1,8 @@
 """Tests for the reference configurations and the ground-truth rule set."""
 
 import pandas as pd
-import pytest
 
-from symbolic_optimization import baselines, data
-
-
-@pytest.fixture(scope="module")
-def frame() -> pd.DataFrame:
-    return data.load_dataset()
+from symbolic_optimization import baselines
 
 
 def test_deterministic_rules_match_indicator_columns(frame: pd.DataFrame) -> None:
