@@ -82,7 +82,8 @@ def run(
     Each cross-validation fold runs one PySR search on standardized
     training data with balanced sample weights. Every expression in the
     resulting hall of fame is scored with average precision on the
-    validation fold and written as one trial record.
+    validation fold and on the untouched holdout, and written as one
+    trial record.
 
     Args:
         n_iterations: PySR iterations per fold.
@@ -95,9 +96,12 @@ def run(
         Path of the written JSONL log.
     """
     frame = load_dataset() if frame is None else frame
-    train_idx, _ = holdout_indices(frame, seed=DATA_SEED)
-    features = make_features(frame).iloc[train_idx].rename(columns=VARIABLE_NAMES)
+    train_idx, holdout_idx = holdout_indices(frame, seed=DATA_SEED)
+    all_features = make_features(frame)
+    features = all_features.iloc[train_idx].rename(columns=VARIABLE_NAMES)
+    holdout_features = all_features.iloc[holdout_idx].rename(columns=VARIABLE_NAMES)
     target = make_target(frame).iloc[train_idx]
+    holdout_target = make_target(frame).iloc[holdout_idx]
     splitter = cv_splitter(seed=DATA_SEED) if splitter is None else splitter
 
     log_path = Path(out_dir) / "pysr.jsonl"
@@ -136,12 +140,19 @@ def run(
         model.fit(fit_scaled, fit_target.to_numpy(), weights=weights)
         register_hard_exit()
         fold_runtime_s = perf_counter() - fold_start
+        holdout_scaled = pd.DataFrame(
+            scaler.transform(holdout_features), columns=features.columns
+        )
 
         equations = model.equations_
         for row_index, row in enumerate(equations.itertuples()):
             t0 = perf_counter()
             predictions = model.predict(val_scaled, index=row_index)
             score = float(average_precision_score(val_target, predictions))
+            holdout_predictions = model.predict(holdout_scaled, index=row_index)
+            holdout_ap = float(
+                average_precision_score(holdout_target, holdout_predictions)
+            )
             append_record(
                 log_path,
                 TrialRecord(
@@ -161,6 +172,7 @@ def run(
                         "fold": fold,
                         "loss": float(row.loss),
                         "fold_runtime_s": fold_runtime_s,
+                        "holdout_ap": holdout_ap,
                     },
                 ),
             )
